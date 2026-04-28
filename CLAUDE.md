@@ -134,8 +134,15 @@ This system is designed to be customized by YOU (Claude). When the user asks you
 | Asks about application status | `tracker` |
 | Fills out application form | `apply` |
 | Searches for new offers | `scan` |
-| Processes pending URLs | `pipeline` |
 | Batch processes offers | `batch` |
+
+### New LaTeX Workflow (`/tailor-resume`)
+
+When the user pastes a job description and requests to tailor their resume:
+1. **Analyze:** Read `cv.md` and match against the job description's core requirements.
+2. **Generate:** Generate an ATS-optimized, LaTeX `.tex` file directly in the `output/` directory named `output/Rakesh_Geddam_[CompanySuffix].tex` (e.g., `Rakesh_Geddam_Ford.tex`). Ensure the content follows the 'First Bullet Rule' and highlights business impact.
+3. **Compile:** Automatically run `python3 compile_tex.py output/Rakesh_Geddam_[CompanySuffix].tex` to build the PDF.
+4. **Deliver:** Let the user know the tailored PDF is ready for review in the `output/` folder!
 
 ### CV Source of Truth
 
