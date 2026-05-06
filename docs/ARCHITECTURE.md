@@ -3,35 +3,37 @@
 ## System Overview
 
 ```
-                    ┌─────────────────────────────────┐
-                    │         Claude Code Agent        │
-                    │   (reads CLAUDE.md + modes/*.md) │
-                    └──────────┬──────────────────────┘
-                               │
-            ┌──────────────────┼──────────────────────┐
-            │                  │                       │
-     ┌──────▼──────┐   ┌──────▼──────┐   ┌───────────▼────────┐
-     │ Single Eval  │   │ Portal Scan │   │   Batch Process    │
-     │ (auto-pipe)  │   │  (scan.md)  │   │   (batch-runner)   │
-     └──────┬──────┘   └──────┬──────┘   └───────────┬────────┘
-            │                  │                       │
-            │           ┌──────▼──────┐          ┌────▼─────┐
-            │           │ pipeline.md │          │ N workers│
-            │           │ (URL inbox) │          │ (claude -p)
-            │           └─────────────┘          └────┬─────┘
-            │                                          │
-     ┌──────▼──────────────────────────────────────────▼──────┐
-     │                    Output Pipeline                      │
-     │  ┌──────────┐  ┌────────────┐  ┌───────────────────┐  │
-     │  │ Report.md│  │  PDF (HTML  │  │ Tracker TSV       │  │
-     │  │ (A-F eval)│  │  → Puppeteer)│  │ (merge-tracker)  │  │
-     │  └──────────┘  └────────────┘  └───────────────────┘  │
-     └────────────────────────────────────────────────────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │  data/applications.md │
-                    │  (canonical tracker)  │
-                    └──────────────────────┘
+                    +-----------------------------------+
+                    |         Claude Code Agent         |
+                    |   (reads CLAUDE.md + modes/*.md)  |
+                    +-----------+-----------------------+
+                                |
+        +-----------------------+-----------------+---------------------+
+        |                       |                 |                     |
+ +------+------+    +-----------+-----+   +-------+----------+  +------+------+
+ | Single Eval  |    |  Portal Scan   |   |  Batch Process   |  |  Jobright   |
+ | (auto-pipe)  |    |   (scan.md)    |   |  (batch-runner)  |  |   Sync      |
+ +------+-------+    +-------+--------+   +--------+---------+  +------+------+
+        |                    |                     |                    |
+        |            +-------+--------+    +-------+-----+    +--------+------+
+        |            |  pipeline.md   |<---+ N workers   |    | detail page   |
+        |            |  (URL inbox)   |    | (claude -p) |    | -> canonical  |
+        |            +-------+--------+    +-------------+    |   URL         |
+        |                    |                                 +--------+------+
+        |                    |<-----------------------------------------+
+        |                    |
+ +------+--------------------+------------------------------------------+
+ |                      Output Pipeline                                  |
+ |  +-----------+  +-------------+  +---------------------+             |
+ |  | Report.md |  | PDF (HTML   |  | Tracker TSV         |             |
+ |  | (A-F eval)|  | ->Puppeteer)|  | (merge-tracker)     |             |
+ |  +-----------+  +-------------+  +---------------------+             |
+ +--------------------------------------------------------------------------+
+                                |
+                     +----------+----------+
+                     | data/applications.md |
+                     | (canonical tracker)  |
+                     +---------------------+
 ```
 
 ## Evaluation Flow (Single Offer)
@@ -76,9 +78,29 @@ The orchestrator manages parallelism, state, retries, and resume.
 cv.md                    →  Evaluation context
 article-digest.md        →  Proof points for matching
 config/profile.yml       →  Candidate identity
+config/providers.yml     →  LLM provider routing (Claude + Gemini)
+config/jobright.yml      →  Jobright.ai integration settings
 portals.yml              →  Scanner configuration
 templates/states.yml     →  Canonical status values
 templates/cv-template.html → PDF generation template
+```
+
+## Jobright Integration Data Flow
+
+```
+Jobright.ai (saved / recommended lists)
+  → scripts/jobright-sync.mjs
+    → detail page navigation (Playwright)
+      → canonical external URL extraction (scripts/jobright-resolve-detail.mjs)
+        → data/pipeline.md  (canonical URL + source metadata)
+        → data/scan-history.tsv  (dedup record)
+          → /career-ops pipeline
+            → evaluation + report + PDF + tracker
+```
+
+Each pipeline entry preserves both URLs:
+```
+- [ ] https://job-boards.greenhouse.io/company/jobs/123 | Acme | Senior AI Engineer | source:jobright | source_url:https://jobright.ai/jobs/abc
 ```
 
 ## File Naming Conventions
@@ -98,6 +120,9 @@ Scripts maintain data consistency:
 | `dedup-tracker.mjs` | Removes duplicate entries by company+role |
 | `normalize-statuses.mjs` | Maps status aliases to canonical values |
 | `cv-sync-check.mjs` | Validates setup consistency |
+| `scripts/jobright-login.mjs` | One-time Jobright.ai browser login; saves auth session |
+| `scripts/jobright-sync.mjs` | Syncs Jobright listings → pipeline.md + scan-history.tsv |
+| `scripts/jobright-resolve-detail.mjs` | Helper: navigate detail page, extract canonical external URL |
 
 ## Dashboard TUI
 

@@ -19,6 +19,10 @@ jds/*
 config/profile.yml
 portals.yml
 
+# Jobright auth session (never commit — contains cookies/tokens)
+.auth/
+!.auth/.gitkeep
+
 # Generated
 .resolved-prompt-*
 node_modules/

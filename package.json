@@ -8,7 +8,9 @@
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
     "pdf": "node generate-pdf.mjs",
-    "sync-check": "node cv-sync-check.mjs"
+    "sync-check": "node cv-sync-check.mjs",
+    "jobright:login": "node scripts/jobright-login.mjs",
+    "jobright:sync": "node scripts/jobright-sync.mjs"
   },
   "keywords": [
     "ai",

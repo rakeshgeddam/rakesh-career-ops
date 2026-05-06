@@ -1,0 +1,54 @@
+# LLM Provider Configuration
+# Controls which AI provider is used for each task type.
+#
+# Supported providers:
+#   - claude  (default, used for evaluation + tailoring)
+#   - gemini  (summarization, research, second opinion, fallback)
+#
+# To enable Gemini:
+#   1. Get a Gemini API key from https://aistudio.google.com/
+#   2. Set the environment variable: export GEMINI_API_KEY="your-key"
+#   3. Set gemini.enabled: true below
+#
+# Claude is used by default for core workflows (evaluation, CV tailoring,
+# application answers) because it powers the career-ops agent runtime.
+# Gemini is wired in as a complementary provider for research-heavy tasks.
+
+default_provider: "claude"
+
+providers:
+  claude:
+    enabled: true
+    # Model used when Claude is selected.
+    # The career-ops agent runtime already uses Claude — no API key needed here.
+    model: "claude-sonnet-4-5"
+    purpose:
+      - "evaluation"         # Full offer evaluation (blocks A–F)
+      - "cv_tailoring"       # Section E: personalized CV/bullet generation
+      - "application_answers" # Section G: draft answers for application forms
+      - "report_generation"  # Synthesize the final evaluation report
+
+  gemini:
+    enabled: true
+    model: "gemini-2.5-pro"
+    # Set GEMINI_API_KEY in your shell environment (not here).
+    api_key_env: "GEMINI_API_KEY"
+    purpose:
+      - "job_summarization"  # Condense long JDs into structured summaries
+      - "company_research"   # Funding, culture, product, headcount signals
+      - "second_opinion"     # Cross-check Claude's score with an independent view
+      - "draft_generation"   # First-pass cover letters and answer drafts
+
+# Task → provider routing.
+# Override the default_provider for specific task types.
+routing:
+  evaluation: "claude"
+  cv_tailoring: "claude"
+  application_answers: "claude"
+  report_generation: "claude"
+  job_summarization: "gemini"
+  company_research: "gemini"
+  second_opinion: "gemini"
+  draft_generation: "gemini"
+  # Fallback provider if the primary fails or is disabled.
+  fallback: "gemini"
