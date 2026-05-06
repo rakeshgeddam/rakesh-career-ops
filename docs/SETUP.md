@@ -170,6 +170,10 @@ export GEMINI_API_KEY="your-api-key-here"
 
 Add this to your shell profile (`~/.zshrc`, `~/.bashrc`) to persist it.
 
+> **Note:** The free Gemini API tier has rate limits (requests/minute and requests/day).
+> For heavy usage (batch evaluations), consider a paid tier or route only high-value tasks
+> through Gemini. See [Google AI pricing](https://ai.google.dev/pricing) for current limits.
+
 **3. Review `config/providers.yml`** — adjust routing if needed.
 
 ### Default routing

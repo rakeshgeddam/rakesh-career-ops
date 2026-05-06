@@ -127,13 +127,17 @@ export async function resolveCanonicalUrl(page, detailUrl, options = {}) {
   });
 
   // --- Strategy 1: Apply button with an ATS/external href ---
+  const pageUrl = page.url();
   for (const selector of applySelectors) {
     try {
-      const href = await page
+      const rawHref = await page
         .locator(selector)
         .first()
         .getAttribute("href", { timeout: 2000 });
-      if (href && isExternalJobUrl(href)) {
+      if (!rawHref) continue;
+      // Resolve relative URLs against the current page URL
+      const href = new URL(rawHref, pageUrl).toString();
+      if (isExternalJobUrl(href)) {
         const canonical = stripTracking ? stripTrackingParams(href) : href;
         return buildResult(meta, detailUrl, canonical, "apply_button");
       }
@@ -145,11 +149,13 @@ export async function resolveCanonicalUrl(page, detailUrl, options = {}) {
   // --- Strategy 2: "View Original Posting" / external link ---
   for (const selector of externalSelectors) {
     try {
-      const href = await page
+      const rawHref = await page
         .locator(selector)
         .first()
         .getAttribute("href", { timeout: 2000 });
-      if (href && isExternalJobUrl(href)) {
+      if (!rawHref) continue;
+      const href = new URL(rawHref, pageUrl).toString();
+      if (isExternalJobUrl(href)) {
         const canonical = stripTracking ? stripTrackingParams(href) : href;
         return buildResult(meta, detailUrl, canonical, "external_link");
       }

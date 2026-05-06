@@ -59,7 +59,13 @@ let cfg = {
 
 try {
   // Try loading yaml — gracefully skip if js-yaml is not installed
-  const { default: yaml } = await import("js-yaml").catch(() => ({ default: null }));
+  const { default: yaml } = await import("js-yaml").catch((err) => {
+    // Only suppress "module not found" errors — warn on anything else
+    if (!err.message?.includes("Cannot find") && !err.code?.includes("ERR_MODULE_NOT_FOUND")) {
+      console.warn(`  ⚠️  Failed to import js-yaml: ${err.message}`);
+    }
+    return { default: null };
+  });
   if (yaml) {
     const raw = fs.readFileSync(path.join(ROOT, "config/jobright.yml"), "utf8");
     cfg = yaml.load(raw);
