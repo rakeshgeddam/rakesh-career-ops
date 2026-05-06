@@ -2,6 +2,17 @@
 
 Escanea portales de empleo configurados, filtra por relevancia de título, y añade nuevas ofertas al pipeline para evaluación posterior.
 
+## Fuentes de descubrimiento
+
+Este modo cubre **portales públicos** (Ashby, Greenhouse, Lever, etc.). Para ofertas de
+tu perfil en **Jobright.ai**, usa el flujo dedicado:
+
+```bash
+node scripts/jobright-sync.mjs   # Sincroniza Jobright → pipeline.md
+```
+
+Consulta `docs/SETUP.md` → sección "Jobright.ai Integration" para la configuración inicial.
+
 ## Ejecución recomendada
 
 Ejecutar como subagente para no consumir contexto del main:

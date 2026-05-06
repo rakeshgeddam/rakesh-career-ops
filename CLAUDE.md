@@ -20,8 +20,12 @@ AI-powered job search automation built on Claude Code: pipeline tracking, offer 
 | `data/pipeline.md` | Inbox of pending URLs |
 | `data/scan-history.tsv` | Scanner dedup history |
 | `portals.yml` | Query and company config |
+| `config/providers.yml` | LLM provider routing (Claude + Gemini) |
+| `config/jobright.yml` | Jobright.ai integration settings |
 | `templates/cv-template.html` | HTML template for CVs |
 | `generate-pdf.mjs` | Puppeteer: HTML to PDF |
+| `scripts/jobright-login.mjs` | One-time Jobright.ai login → saves `.auth/` session |
+| `scripts/jobright-sync.mjs` | Sync Jobright listings → pipeline.md |
 | `article-digest.md` | Compact proof points from portfolio (optional) |
 | `interview-prep/story-bank.md` | Accumulated STAR+R stories across evaluations |
 | `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`) |
@@ -135,6 +139,7 @@ This system is designed to be customized by YOU (Claude). When the user asks you
 | Fills out application form | `apply` |
 | Searches for new offers | `scan` |
 | Batch processes offers | `batch` |
+| Sync jobs from Jobright.ai | Run `node scripts/jobright-sync.mjs` (then `/career-ops pipeline`) |
 
 ### New LaTeX Workflow (`/tailor-resume`)
 
